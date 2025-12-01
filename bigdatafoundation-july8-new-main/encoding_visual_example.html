@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encoding Process Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .step {
+            background: rgba(255,255,255,0.15);
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        .step h3 {
+            color: #4CAF50;
+            margin-top: 0;
+        }
+        .data-table {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .data-cell {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .header {
+            background: rgba(76,175,80,0.3);
+            font-weight: bold;
+        }
+        .arrow {
+            text-align: center;
+            font-size: 24px;
+            color: #FFD700;
+            margin: 10px 0;
+        }
+        .highlight {
+            background: rgba(255,193,7,0.3);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .vector {
+            font-family: monospace;
+            background: rgba(33,150,243,0.3);
+            padding: 5px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 String Indexer + One-Hot Encoding Visual Example</h1>
+        
+        <div class="step">
+            <h3>📊 Step 1: Original Data</h3>
+            <p>We have a small bank dataset with categorical and numerical data:</p>
+            <div class="data-table">
+                <div class="data-cell header">Age</div>
+                <div class="data-cell header">Job</div>
+                <div class="data-cell header">Marital</div>
+                <div class="data-cell header">Deposit</div>
+                
+                <div class="data-cell">25</div>
+                <div class="data-cell">teacher</div>
+                <div class="data-cell">single</div>
+                <div class="data-cell">yes</div>
+                
+                <div class="data-cell">35</div>
+                <div class="data-cell">student</div>
+                <div class="data-cell">married</div>
+                <div class="data-cell">no</div>
+                
+                <div class="data-cell">28</div>
+                <div class="data-cell">teacher</div>
+                <div class="data-cell">single</div>
+                <div class="data-cell">yes</div>
+                
+                <div class="data-cell">42</div>
+                <div class="data-cell">manager</div>
+                <div class="data-cell">divorced</div>
+                <div class="data-cell">no</div>
+            </div>
+        </div>
+
+        <div class="arrow">⬇️</div>
+
+        <div class="step">
+            <h3>🔢 Step 2: String Indexer (Text → Numbers)</h3>
+            <p>StringIndexer converts text to numbers based on frequency:</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>Job Frequency Analysis:</h4>
+                    <ul>
+                        <li><span class="highlight">teacher</span>: appears 2 times → index <strong>0</strong></li>
+                        <li><span class="highlight">student</span>: appears 1 time → index <strong>1</strong></li>
+                        <li><span class="highlight">manager</span>: appears 1 time → index <strong>2</strong></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Marital Status:</h4>
+                    <ul>
+                        <li><span class="highlight">single</span>: appears 2 times → index <strong>0</strong></li>
+                        <li><span class="highlight">married</span>: appears 1 time → index <strong>1</strong></li>
+                        <li><span class="highlight">divorced</span>: appears 1 time → index <strong>2</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="data-table">
+                <div class="data-cell header">Age</div>
+                <div class="data-cell header">JobIndex</div>
+                <div class="data-cell header">MaritalIndex</div>
+                <div class="data-cell header">DepositIndex</div>
+                
+                <div class="data-cell">25</div>
+                <div class="data-cell">0</div>
+                <div class="data-cell">0</div>
+                <div class="data-cell">1</div>
+                
+                <div class="data-cell">35</div>
+                <div class="data-cell">1</div>
+                <div class="data-cell">1</div>
+                <div class="data-cell">0</div>
+                
+                <div class="data-cell">28</div>
+                <div class="data-cell">0</div>
+                <div class="data-cell">0</div>
+                <div class="data-cell">1</div>
+                
+                <div class="data-cell">42</div>
+                <div class="data-cell">2</div>
+                <div class="data-cell">2</div>
+                <div class="data-cell">0</div>
+            </div>
+        </div>
+
+        <div class="arrow">⬇️</div>
+
+        <div class="step">
+            <h3>🎯 Step 3: One-Hot Encoding (Avoid Number Bias)</h3>
+            <p>Problem: ML thinks manager(2) > student(1) > teacher(0) mathematically!</p>
+            <p>Solution: Create separate binary columns for each category:</p>
+            
+            <div style="margin: 15px 0;">
+                <h4>Job One-Hot Vectors:</h4>
+                <ul>
+                    <li>teacher (index 0) → <span class="vector">[1, 0, 0]</span></li>
+                    <li>student (index 1) → <span class="vector">[0, 1, 0]</span></li>
+                    <li>manager (index 2) → <span class="vector">[0, 0, 1]</span></li>
+                </ul>
+                
+                <h4>Marital One-Hot Vectors:</h4>
+                <ul>
+                    <li>single (index 0) → <span class="vector">[1, 0, 0]</span></li>
+                    <li>married (index 1) → <span class="vector">[0, 1, 0]</span></li>
+                    <li>divorced (index 2) → <span class="vector">[0, 0, 1]</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="arrow">⬇️</div>
+
+        <div class="step">
+            <h3>🔧 Step 4: Vector Assembler (Combine Everything)</h3>
+            <p>Combines all features into a single vector for machine learning:</p>
+            
+            <div style="overflow-x: auto;">
+                <h4>Final Feature Vectors:</h4>
+                <div style="font-family: monospace; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 5px;">
+                    Row 1: [25, 1,0,0, 1,0,0] → age=25, job=teacher, marital=single<br>
+                    Row 2: [35, 0,1,0, 0,1,0] → age=35, job=student, marital=married<br>
+                    Row 3: [28, 1,0,0, 1,0,0] → age=28, job=teacher, marital=single<br>
+                    Row 4: [42, 0,0,1, 0,0,1] → age=42, job=manager, marital=divorced
+                </div>
+                
+                <p style="margin-top: 15px;">
+                    <strong>Vector Structure:</strong><br>
+                    [age, job_teacher, job_student, job_manager, marital_single, marital_married, marital_divorced]
+                </p>
+            </div>
+        </div>
+
+        <div class="arrow">⬇️</div>
+
+        <div class="step">
+            <h3>🎉 Step 5: Ready for Machine Learning!</h3>
+            <p>Now we have clean numerical data that ML algorithms can understand:</p>
+            
+            <div class="data-table">
+                <div class="data-cell header">Features Vector</div>
+                <div class="data-cell header">Label</div>
+                
+                <div class="data-cell">[25, 1,0,0, 1,0,0]</div>
+                <div class="data-cell">1 (yes)</div>
+                
+                <div class="data-cell">[35, 0,1,0, 0,1,0]</div>
+                <div class="data-cell">0 (no)</div>
+                
+                <div class="data-cell">[28, 1,0,0, 1,0,0]</div>
+                <div class="data-cell">1 (yes)</div>
+                
+                <div class="data-cell">[42, 0,0,1, 0,0,1]</div>
+                <div class="data-cell">0 (no)</div>
+            </div>
+            
+            <p style="text-align: center; margin-top: 20px; font-size: 18px;">
+                ✅ <strong>Success!</strong> Raw text data transformed into numbers for ML algorithms!
+            </p>
+        </div>
+        
+        <div class="step">
+            <h3>🔄 Pipeline Magic</h3>
+            <p>Instead of doing these steps manually every time, Pipeline does it all automatically:</p>
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 5px; font-family: monospace;">
+# One pipeline handles everything!<br>
+pipeline = Pipeline(stages=[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;StringIndexer(job → jobIndex),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;OneHotEncoder(jobIndex → jobVec),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;StringIndexer(marital → maritalIndex),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;OneHotEncoder(maritalIndex → maritalVec),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;VectorAssembler([age, jobVec, maritalVec] → features)<br>
+])<br><br>
+# Apply to any new data with one command!<br>
+clean_data = pipeline.fit(train).transform(new_data)
+            </div>
+        </div>
+    </div>
+</body>
+</html>

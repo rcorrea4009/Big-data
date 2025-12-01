@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PySpark ML Pipeline Tutorial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left: 5px solid #3498db;
+        }
+        
+        .step-header {
+            color: #2980b9;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 2px solid #34495e;
+        }
+        
+        .example-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .example-table th, .example-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .example-table th {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .example-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .flow-box {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .flow-arrow {
+            font-size: 1.5em;
+            color: #e74c3c;
+            margin: 0 10px;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+        
+        .visual-example {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #3498db;
+            margin: 15px 0;
+        }
+        
+        .transformation-visual {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .before-after {
+            flex: 1;
+            min-width: 250px;
+            margin: 10px;
+        }
+        
+        .transform-arrow {
+            font-size: 2em;
+            color: #27ae60;
+            margin: 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 PySpark ML Pipeline: From Raw Data to ML-Ready Features</h1>
+        
+        <div class="section">
+            <div class="step-header">📊 Overview: What We're Building</div>
+            <p>We're creating a machine learning pipeline that transforms raw banking data into features that algorithms can understand. Think of it as a factory assembly line for data!</p>
+            
+            <div class="flow-diagram">
+                <div class="flow-box">Raw Data</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Clean & Index</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">One-Hot Encode</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Assemble Features</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">ML Ready!</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🏗️ Step 1: Setting Up Our Data Categories</div>
+            <div class="code-block">
+categoricalColumns = ['job', 'marital', 'education', 'default', 'housing', 'loan', 'contact', 'poutcome']
+stages = []
+            </div>
+            
+            <div class="highlight">
+                <strong>What's happening?</strong> We're identifying columns that contain categories (like job types, marital status) rather than numbers.
+            </div>
+            
+            <div class="visual-example">
+                <h4>Example Raw Data:</h4>
+                <table class="example-table">
+                    <tr>
+                        <th>job</th>
+                        <th>marital</th>
+                        <th>education</th>
+                        <th>age</th>
+                        <th>balance</th>
+                    </tr>
+                    <tr>
+                        <td>management</td>
+                        <td>married</td>
+                        <td>tertiary</td>
+                        <td>39</td>
+                        <td>1756</td>
+                    </tr>
+                    <tr>
+                        <td>technician</td>
+                        <td>single</td>
+                        <td>secondary</td>
+                        <td>33</td>
+                        <td>4789</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🔢 Step 2: String Indexing (Converting Text to Numbers)</div>
+            <div class="code-block">
+for categoricalCol in categoricalColumns:
+    stringIndexer = StringIndexer(inputCol = categoricalCol, outputCol = categoricalCol + 'Index')
+    # ... (encoder comes next)
+    stages += [stringIndexer, encoder]
+            </div>
+            
+            <div class="highlight">
+                <strong>Why do this?</strong> Machine learning algorithms can't work with text directly. We need to convert "management" → 0, "technician" → 1, etc.
+            </div>
+            
+            <div class="transformation-visual">
+                <div class="before-after">
+                    <h4>Before (Text):</h4>
+                    <table class="example-table">
+                        <tr><th>job</th></tr>
+                        <tr><td>management</td></tr>
+                        <tr><td>technician</td></tr>
+                        <tr><td>services</td></tr>
+                        <tr><td>management</td></tr>
+                    </table>
+                </div>
+                <div class="transform-arrow">→</div>
+                <div class="before-after">
+                    <h4>After (Numbers):</h4>
+                    <table class="example-table">
+                        <tr><th>jobIndex</th></tr>
+                        <tr><td>0</td></tr>
+                        <tr><td>1</td></tr>
+                        <tr><td>2</td></tr>
+                        <tr><td>0</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🎯 Step 3: One-Hot Encoding (The Magic Transformation)</div>
+            <div class="code-block">
+encoder = OneHotEncoder(inputCols=[stringIndexer.getOutputCol()], 
+                       outputCols=[categoricalCol + "classVec"])
+            </div>
+            
+            <div class="highlight">
+                <strong>The Problem:</strong> If we just use 0, 1, 2 for job types, the algorithm might think "technician" (1) is somehow "between" management (0) and services (2). That's wrong!
+            </div>
+            
+            <div class="highlight">
+                <strong>The Solution:</strong> One-hot encoding creates separate binary columns for each category.
+            </div>
+            
+            <div class="transformation-visual">
+                <div class="before-after">
+                    <h4>Indexed Data:</h4>
+                    <table class="example-table">
+                        <tr><th>jobIndex</th></tr>
+                        <tr><td>0 (management)</td></tr>
+                        <tr><td>1 (technician)</td></tr>
+                        <tr><td>2 (services)</td></tr>
+                    </table>
+                </div>
+                <div class="transform-arrow">→</div>
+                <div class="before-after">
+                    <h4>One-Hot Encoded:</h4>
+                    <table class="example-table">
+                        <tr><th>jobclassVec</th></tr>
+                        <tr><td>[1, 0, 0]</td></tr>
+                        <tr><td>[0, 1, 0]</td></tr>
+                        <tr><td>[0, 0, 1]</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="highlight">
+                <strong>Reading the vectors:</strong> [1, 0, 0] means "management: YES, technician: NO, services: NO"
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🎯 Step 4: Preparing the Target Variable</div>
+            <div class="code-block">
+label_stringIdx = StringIndexer(inputCol = 'deposit', outputCol = 'label')
+stages += [label_stringIdx]
+            </div>
+            
+            <div class="highlight">
+                <strong>What's this?</strong> The 'deposit' column is what we want to predict (yes/no). We convert it to numbers too: "yes" → 1, "no" → 0.
+            </div>
+            
+            <div class="transformation-visual">
+                <div class="before-after">
+                    <h4>Original Target:</h4>
+                    <table class="example-table">
+                        <tr><th>deposit</th></tr>
+                        <tr><td>yes</td></tr>
+                        <tr><td>no</td></tr>
+                        <tr><td>yes</td></tr>
+                    </table>
+                </div>
+                <div class="transform-arrow">→</div>
+                <div class="before-after">
+                    <h4>Indexed Label:</h4>
+                    <table class="example-table">
+                        <tr><th>label</th></tr>
+                        <tr><td>1</td></tr>
+                        <tr><td>0</td></tr>
+                        <tr><td>1</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🔧 Step 5: Assembling All Features</div>
+            <div class="code-block">
+numericCols = ['age', 'balance', 'duration', 'campaign', 'pdays', 'previous']
+assemblerInputs = [c + "classVec" for c in categoricalColumns] + numericCols
+assembler = VectorAssembler(inputCols=assemblerInputs, outputCol="features")
+stages += [assembler]
+            </div>
+            
+            <div class="highlight">
+                <strong>The Final Step:</strong> We combine all our encoded categorical features with the numeric columns into one big feature vector.
+            </div>
+            
+            <div class="visual-example">
+                <h4>What assemblerInputs looks like:</h4>
+                <div class="code-block">
+['jobclassVec', 'maritalclassVec', 'educationclassVec', 'defaultclassVec', 
+ 'housingclassVec', 'loanclassVec', 'contactclassVec', 'poutcomeclassVec', 
+ 'age', 'balance', 'duration', 'campaign', 'pdays', 'previous']
+                </div>
+                
+                <h4>Final Feature Vector Example:</h4>
+                <table class="example-table">
+                    <tr><th>features</th></tr>
+                    <tr><td>[1,0,0, 1,0, 0,1,0, 0,1, 1,0, 0,1, 1,0, 0,0,1, 39, 1756, 180, 2, -1, 0]</td></tr>
+                </table>
+                <p><em>This vector contains: job encoding + marital encoding + education encoding + ... + age + balance + duration + ...</em></p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">⚙️ Step 6: Building and Running the Pipeline</div>
+            <div class="code-block">
+from pyspark.ml import Pipeline
+
+pipeline = Pipeline(stages = stages)
+pipelineModel = pipeline.fit(data)
+data = pipelineModel.transform(data)
+
+selectedCols = ['label', 'features'] + cols
+data = data.select(selectedCols)
+            </div>
+            
+            <div class="highlight">
+                <strong>What's happening:</strong>
+                <ol>
+                    <li><strong>Pipeline creation:</strong> We bundle all our transformation steps</li>
+                    <li><strong>Fitting:</strong> The pipeline learns the mappings (like which job gets which index)</li>
+                    <li><strong>Transformation:</strong> Apply all transformations to our data</li>
+                    <li><strong>Selection:</strong> Keep only the columns we need for machine learning</li>
+                </ol>
+            </div>
+            
+            <div class="flow-diagram">
+                <div class="flow-box">Create Pipeline</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Fit to Data</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Transform Data</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Select Final Columns</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🎉 Final Result</div>
+            <p>After all transformations, your data looks like this:</p>
+            
+            <table class="example-table">
+                <tr>
+                    <th>label</th>
+                    <th>features</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>[1,0,0,1,0,0,1,0,0,1,1,0,0,1,1,0,0,0,1,39,1756,180,2,-1,0]</td>
+                </tr>
+                <tr>
+                    <td>0</td>
+                    <td>[0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,1,0,0,33,4789,95,1,999,2]</td>
+                </tr>
+            </table>
+            
+            <div class="highlight">
+                <strong>Perfect for ML!</strong> Now you have:
+                <ul>
+                    <li><strong>label:</strong> What we want to predict (0 or 1)</li>
+                    <li><strong>features:</strong> All input variables in a single vector</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">💡 Key Concepts to Remember</div>
+            <div class="highlight">
+                <ol>
+                    <li><strong>StringIndexer:</strong> Converts text categories to numbers</li>
+                    <li><strong>OneHotEncoder:</strong> Converts numbers to binary vectors (prevents false ordering)</li>
+                    <li><strong>VectorAssembler:</strong> Combines all features into one vector</li>
+                    <li><strong>Pipeline:</strong> Chains all transformations together</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

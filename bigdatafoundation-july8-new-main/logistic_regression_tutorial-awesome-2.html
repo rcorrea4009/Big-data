@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistic Regression Tutorial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .step-header {
+            color: #c0392b;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 2px solid #34495e;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        
+        .visual-example {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e74c3c;
+            margin: 15px 0;
+        }
+        
+        .math-section {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #27ae60;
+            margin: 15px 0;
+        }
+        
+        .coefficient-demo {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .coeff-box {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .positive {
+            background: #27ae60;
+        }
+        
+        .negative {
+            background: #e74c3c;
+        }
+        
+        .near-zero {
+            background: #95a5a6;
+        }
+        
+        .example-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .example-table th, .example-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .example-table th {
+            background: #e74c3c;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .example-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .plot-simulation {
+            background: #f8f9fa;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .plot-container {
+            width: 100%;
+            height: 300px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            position: relative;
+            margin: 10px 0;
+        }
+        
+        .axis-label {
+            position: absolute;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .y-label {
+            left: 10px;
+            top: 50%;
+            transform: rotate(-90deg);
+            transform-origin: center;
+        }
+        
+        .x-label {
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .plot-line {
+            position: absolute;
+            height: 80%;
+            width: 80%;
+            top: 10%;
+            left: 10%;
+            background: linear-gradient(to right, 
+                #e74c3c 0%, #e74c3c 20%, 
+                #f39c12 20%, #f39c12 40%, 
+                #27ae60 40%, #27ae60 60%, 
+                #3498db 60%, #3498db 80%, 
+                #9b59b6 80%, #9b59b6 100%);
+            border-radius: 3px;
+        }
+        
+        .concept-box {
+            background: #e8f4fd;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: #fdf2e8;
+            border: 2px solid #f39c12;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Logistic Regression & Coefficient Analysis in PySpark</h1>
+        
+        <div class="section">
+            <div class="step-header">🎯 Step 1: Creating the Logistic Regression Model</div>
+            <div class="code-block">
+from pyspark.ml.classification import LogisticRegression
+
+lr = LogisticRegression(featuresCol = 'features', 
+                       labelCol = 'label', 
+                       maxIter=10)
+            </div>
+            
+            <div class="highlight">
+                <strong>What's happening:</strong> We're setting up a logistic regression classifier that will learn to predict binary outcomes (yes/no, 0/1).
+            </div>
+            
+            <div class="concept-box">
+                <h4>🤔 What is Logistic Regression?</h4>
+                <p><strong>Think of it as a "smart decision maker":</strong></p>
+                <ul>
+                    <li>It looks at all the features (age, balance, job type, etc.)</li>
+                    <li>It learns patterns from training data</li>
+                    <li>It assigns weights (coefficients) to each feature</li>
+                    <li>It outputs a probability: "How likely is this person to say YES?"</li>
+                </ul>
+            </div>
+            
+            <div class="visual-example">
+                <h4>Parameter Breakdown:</h4>
+                <table class="example-table">
+                    <tr>
+                        <th>Parameter</th>
+                        <th>What it does</th>
+                        <th>In our case</th>
+                    </tr>
+                    <tr>
+                        <td>featuresCol</td>
+                        <td>Which column contains our input features</td>
+                        <td>'features' (the vector we created in pipeline)</td>
+                    </tr>
+                    <tr>
+                        <td>labelCol</td>
+                        <td>Which column contains the correct answers</td>
+                        <td>'label' (0 for no, 1 for yes)</td>
+                    </tr>
+                    <tr>
+                        <td>maxIter</td>
+                        <td>How many times to refine the model</td>
+                        <td>10 iterations (pretty low, usually 100+)</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🏋️ Step 2: Training the Model</div>
+            <div class="code-block">
+lrModel = lr.fit(train)
+            </div>
+            
+            <div class="highlight">
+                <strong>The Learning Process:</strong> The model examines thousands of examples and figures out which features are most important for predicting the outcome.
+            </div>
+            
+            <div class="math-section">
+                <h4>🧠 What Happens During Training:</h4>
+                <ol>
+                    <li><strong>Initial Guess:</strong> Model starts with random weights for each feature</li>
+                    <li><strong>Make Predictions:</strong> Uses current weights to predict outcomes</li>
+                    <li><strong>Check Accuracy:</strong> Compares predictions with actual answers</li>
+                    <li><strong>Adjust Weights:</strong> Increases weights for helpful features, decreases for unhelpful ones</li>
+                    <li><strong>Repeat:</strong> Does this 10 times (maxIter=10) to improve</li>
+                </ol>
+            </div>
+            
+            <div class="visual-example">
+                <h4>Training Process Visualization:</h4>
+                <p><strong>Iteration 1:</strong> "Age seems important, let me increase its weight..."</p>
+                <p><strong>Iteration 5:</strong> "Job type matters a lot, balance not so much..."</p>
+                <p><strong>Iteration 10:</strong> "I think I've got it! Here are my final weights."</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">📊 Step 3: Extracting and Analyzing Coefficients</div>
+            <div class="code-block">
+import matplotlib.pyplot as plt
+import numpy as np
+
+beta = np.sort(lrModel.coefficients)
+plt.plot(beta)
+plt.ylabel('Beta Coefficients')
+plt.show()
+            </div>
+            
+            <div class="highlight">
+                <strong>What are coefficients (β - beta)?</strong> These are the "weights" the model learned for each feature. They tell us how much each feature influences the final prediction.
+            </div>
+            
+            <div class="concept-box">
+                <h4>🔍 Understanding Coefficients:</h4>
+                <div class="coefficient-demo">
+                    <div class="coeff-box positive">
+                        <strong>Positive β</strong><br>
+                        +2.5<br>
+                        <small>Increases probability</small>
+                    </div>
+                    <div class="coeff-box near-zero">
+                        <strong>Near Zero β</strong><br>
+                        -0.1<br>
+                        <small>Little impact</small>
+                    </div>
+                    <div class="coeff-box negative">
+                        <strong>Negative β</strong><br>
+                        -1.8<br>
+                        <small>Decreases probability</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visual-example">
+                <h4>Real Example with Banking Data:</h4>
+                <table class="example-table">
+                    <tr>
+                        <th>Feature</th>
+                        <th>Coefficient</th>
+                        <th>Interpretation</th>
+                    </tr>
+                    <tr>
+                        <td>Age</td>
+                        <td>+0.15</td>
+                        <td>Older people slightly more likely to say yes</td>
+                    </tr>
+                    <tr>
+                        <td>Balance</td>
+                        <td>+0.003</td>
+                        <td>Higher balance = more likely to say yes</td>
+                    </tr>
+                    <tr>
+                        <td>Job: Management</td>
+                        <td>+0.8</td>
+                        <td>Managers much more likely to say yes</td>
+                    </tr>
+                    <tr>
+                        <td>Job: Student</td>
+                        <td>-0.5</td>
+                        <td>Students less likely to say yes</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Campaign</td>
+                        <td>-0.02</td>
+                        <td>Previous contact slightly decreases chance</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">📈 Step 4: Why Sort and Plot the Coefficients?</div>
+            <div class="code-block">
+beta = np.sort(lrModel.coefficients)  # Sort from smallest to largest
+            </div>
+            
+            <div class="concept-box">
+                <h4>🎯 Purpose of the Coefficient Plot:</h4>
+                <ol>
+                    <li><strong>Feature Importance:</strong> See which features matter most</li>
+                    <li><strong>Model Interpretation:</strong> Understand what drives predictions</li>
+                    <li><strong>Feature Selection:</strong> Identify features to keep or remove</li>
+                    <li><strong>Debugging:</strong> Spot unusual or unexpected patterns</li>
+                </ol>
+            </div>
+            
+            <div class="plot-simulation">
+                <h4>What the Plot Looks Like:</h4>
+                <div class="plot-container">
+                    <div class="axis-label y-label">Beta Coefficients</div>
+                    <div class="axis-label x-label">Feature Index (sorted)</div>
+                    <div class="plot-line"></div>
+                </div>
+                <p><strong>Reading the plot:</strong></p>
+                <ul>
+                    <li><strong>Left side:</strong> Most negative coefficients (features that decrease probability)</li>
+                    <li><strong>Middle:</strong> Near-zero coefficients (features with little impact)</li>
+                    <li><strong>Right side:</strong> Most positive coefficients (features that increase probability)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🔍 Step 5: What to Look for in the Plot</div>
+            
+            <div class="visual-example">
+                <h4>Healthy vs. Problematic Patterns:</h4>
+                
+                <div style="display: flex; justify-content: space-between; flex-wrap: wrap;">
+                    <div style="flex: 1; margin: 10px; min-width: 300px;">
+                        <h5 style="color: #27ae60;">✅ Good Signs:</h5>
+                        <ul>
+                            <li>Smooth curve from negative to positive</li>
+                            <li>Most coefficients near zero</li>
+                            <li>A few strong positive/negative coefficients</li>
+                            <li>No extreme outliers</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="flex: 1; margin: 10px; min-width: 300px;">
+                        <h5 style="color: #e74c3c;">⚠️ Warning Signs:</h5>
+                        <ul>
+                            <li>Many very large coefficients</li>
+                            <li>Sudden jumps or spikes</li>
+                            <li>All coefficients very close to zero</li>
+                            <li>Unexpected feature importance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">💡 Practical Applications</div>
+            
+            <div class="concept-box">
+                <h4>🏦 In Banking Context:</h4>
+                <p>If you're predicting whether someone will open a bank account:</p>
+                <ul>
+                    <li><strong>High positive coefficient for "Age":</strong> Target older customers</li>
+                    <li><strong>Negative coefficient for "Previous Contacts":</strong> Don't over-contact people</li>
+                    <li><strong>High coefficient for "Job: Management":</strong> Focus marketing on professionals</li>
+                    <li><strong>Near-zero coefficient for "Day of Week":</strong> Timing doesn't matter much</li>
+                </ul>
+            </div>
+            
+            <div class="warning-box">
+                <h4>⚠️ Important Caveats:</h4>
+                <ul>
+                    <li><strong>Correlation ≠ Causation:</strong> High coefficient doesn't mean the feature causes the outcome</li>
+                    <li><strong>Feature Scaling:</strong> Coefficients are affected by the scale of features</li>
+                    <li><strong>Multicollinearity:</strong> Related features can affect each other's coefficients</li>
+                    <li><strong>Interactions:</strong> Some features work together in ways not captured by individual coefficients</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🛠️ Code Improvements for Students</div>
+            
+            <div class="code-block">
+# Enhanced version with feature names
+feature_names = ['age', 'balance', 'duration', 'campaign', 'pdays', 'previous'] + \
+               [f'{col}_encoded' for col in categoricalColumns]
+
+coefficients = lrModel.coefficients
+feature_importance = list(zip(feature_names, coefficients))
+feature_importance.sort(key=lambda x: abs(x[1]), reverse=True)
+
+# Print top 10 most important features
+print("Top 10 Most Important Features:")
+for name, coeff in feature_importance[:10]:
+    print(f"{name}: {coeff:.4f}")
+
+# Plot with labels
+import matplotlib.pyplot as plt
+sorted_coeffs = np.sort(coefficients)
+plt.figure(figsize=(10, 6))
+plt.plot(sorted_coeffs, marker='o')
+plt.title('Logistic Regression Coefficients (Sorted)')
+plt.xlabel('Feature Index (sorted by coefficient value)')
+plt.ylabel('Beta Coefficient Value')
+plt.grid(True, alpha=0.3)
+plt.axhline(y=0, color='r', linestyle='--', alpha=0.5)
+plt.show()
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="step-header">🎓 Key Takeaways for Students</div>
+            
+            <div class="highlight">
+                <ol>
+                    <li><strong>Logistic Regression learns weights:</strong> Each feature gets a coefficient that shows its importance</li>
+                    <li><strong>Positive coefficients increase probability:</strong> Higher values make "yes" more likely</li>
+                    <li><strong>Negative coefficients decrease probability:</strong> Higher values make "no" more likely</li>
+                    <li><strong>Coefficient magnitude matters:</strong> Larger absolute values = more important features</li>
+                    <li><strong>Visualization helps interpretation:</strong> Plotting coefficients reveals model behavior</li>
+                    <li><strong>Domain knowledge is crucial:</strong> Always check if the model's learned patterns make business sense</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
